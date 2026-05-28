@@ -342,25 +342,43 @@
       line-height: 1.7;
     }
 
-    .musical-card {
+    .musical-stage {
   text-align: center;
+  overflow: hidden;
 }
 
-.musical-img {
-  width: 100%;
-  max-width: 360px;
-  height: 500px;
-  object-fit: contain;
-  border-radius: 28px;
-  margin-bottom: 18px;
-  background: white;
+.poster-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 22px;
+  margin: 28px 0;
+}
+
+.poster {
+  width: 190px;
+  height: 290px;
+  object-fit: cover;
+  border-radius: 24px;
+  opacity: 0.45;
+  transform: scale(0.86);
+  transition: 0.35s ease;
+  box-shadow: 0 14px 35px rgba(167, 139, 250, 0.18);
+}
+
+.poster.active {
+  width: 260px;
+  height: 390px;
+  opacity: 1;
+  transform: scale(1);
+  box-shadow: 0 24px 70px rgba(167, 139, 250, 0.35);
 }
 
 .musical-buttons {
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin-top: 18px;
+  margin-top: 22px;
 }
 
 .musical-buttons button {
@@ -531,26 +549,19 @@
   <section id="musicals">
   <h2 class="section-title">Musicals I Love</h2>
 
-  <div class="card musical-card">
-
-    <img
-      id="musicalImage"
-      class="musical-img"
-      src="https://upload.wikimedia.org/wikipedia/en/3/3d/The_Phantom_of_the_Opera_%281986_musical%29.jpg"
-    />
+  <div class="card musical-stage">
+    <div class="poster-row" id="posterRow"></div>
 
     <h3 id="musicalTitle">The Phantom of the Opera</h3>
 
     <p id="musicalText">
-      One of my favorite musicals for its dramatic storytelling,
-      iconic music, and gothic atmosphere.
+      One of my favorite musicals for its dramatic storytelling, iconic music, and gothic atmosphere.
     </p>
 
     <div class="musical-buttons">
       <button onclick="prevMusical()">Previous</button>
       <button onclick="nextMusical()">Next</button>
     </div>
-
   </div>
 </section>
 
@@ -575,21 +586,37 @@ const musicals = [
 
 let currentMusical = 0;
 
-function showMusical(index) {
-  document.getElementById("musicalImage").src = musicals[index].image;
-  document.getElementById("musicalTitle").innerText = musicals[index].title;
-  document.getElementById("musicalText").innerText = musicals[index].text;
+function renderPosters() {
+  const row = document.getElementById("posterRow");
+  row.innerHTML = "";
+
+  musicals.forEach((musical, index) => {
+    const img = document.createElement("img");
+    img.src = musical.image;
+    img.alt = musical.title;
+    img.className = index === currentMusical ? "poster active" : "poster";
+    img.onclick = () => {
+      currentMusical = index;
+      renderPosters();
+    };
+    row.appendChild(img);
+  });
+
+  document.getElementById("musicalTitle").innerText = musicals[currentMusical].title;
+  document.getElementById("musicalText").innerText = musicals[currentMusical].text;
 }
 
 function nextMusical() {
   currentMusical = (currentMusical + 1) % musicals.length;
-  showMusical(currentMusical);
+  renderPosters();
 }
 
 function prevMusical() {
   currentMusical = (currentMusical - 1 + musicals.length) % musicals.length;
-  showMusical(currentMusical);
+  renderPosters();
 }
+
+renderPosters();
 </script>
   
   <section id="contact">
