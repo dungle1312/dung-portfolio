@@ -348,28 +348,38 @@
       color: var(--muted);
       font-weight: 600;
     }
-
     @media (max-width: 850px) {
       .nav-links {
-        display: none;
-      }
-
-      .hero, .about {
-        grid-template-columns: 1fr;
-      }
-
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .hero {
-        margin-top: 16px;
-      }
-
-      .avatar {
-        height: 260px;
-      }
+       display: none;
     }
+
+    .hero {
+      grid-template-columns: 1fr;
+      margin-top: 16px;
+    }
+
+    .about {
+      flex-direction: column;
+    }
+
+    .about-photo {
+      width: 100%;
+      min-height: 260px;
+    }
+
+    .about-text {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .avatar {
+      height: 260px;
+      }
+  }
   </style>
 </head>
 <body>
