@@ -342,6 +342,34 @@
       line-height: 1.7;
     }
 
+    .musical-card {
+  text-align: center;
+}
+
+.musical-img {
+  width: 100%;
+  max-height: 520px;
+  object-fit: cover;
+  border-radius: 28px;
+  margin-bottom: 18px;
+}
+
+.musical-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.musical-buttons button {
+  border: none;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  color: white;
+}
     footer {
       padding: 34px 0 48px;
       text-align: center;
@@ -391,6 +419,7 @@
     <ul class="nav-links">
       <li><a href="#projects">Projects</a></li>
       <li><a href="#about">About</a></li>
+      <li><a href="#hobbys"></a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
   </nav>
@@ -497,6 +526,70 @@
     </div>
   </section>
 
+  <section id="musicals">
+  <h2 class="section-title">Musicals I Love</h2>
+
+  <div class="card musical-card">
+
+    <img
+      id="musicalImage"
+      class="musical-img"
+      src="https://upload.wikimedia.org/wikipedia/en/3/3d/The_Phantom_of_the_Opera_%281986_musical%29.jpg"
+    />
+
+    <h3 id="musicalTitle">The Phantom of the Opera</h3>
+
+    <p id="musicalText">
+      One of my favorite musicals for its dramatic storytelling,
+      iconic music, and gothic atmosphere.
+    </p>
+
+    <div class="musical-buttons">
+      <button onclick="prevMusical()">Previous</button>
+      <button onclick="nextMusical()">Next</button>
+    </div>
+
+  </div>
+</section>
+
+<script>
+const musicals = [
+  {
+    title: "The Phantom of the Opera",
+    image: "https://upload.wikimedia.org/wikipedia/en/3/3d/The_Phantom_of_the_Opera_%281986_musical%29.jpg",
+    text: "One of my favorite musicals for its dramatic storytelling, iconic music, and gothic atmosphere."
+  },
+  {
+    title: "Notre-Dame de Paris",
+    image: "https://upload.wikimedia.org/wikipedia/en/6/6f/Notre-Dame_de_Paris_%28musical%29.jpg",
+    text: "A powerful French musical inspired by Victor Hugo's novel with emotional songs and tragic characters."
+  },
+  {
+    title: "Les Misérables",
+    image: "https://upload.wikimedia.org/wikipedia/en/4/4f/Les_Miserables_2010_London_Poster.jpg",
+    text: "A legendary musical about revolution, love, sacrifice, and hope."
+  }
+];
+
+let currentMusical = 0;
+
+function showMusical(index) {
+  document.getElementById("musicalImage").src = musicals[index].image;
+  document.getElementById("musicalTitle").innerText = musicals[index].title;
+  document.getElementById("musicalText").innerText = musicals[index].text;
+}
+
+function nextMusical() {
+  currentMusical = (currentMusical + 1) % musicals.length;
+  showMusical(currentMusical);
+}
+
+function prevMusical() {
+  currentMusical = (currentMusical - 1 + musicals.length) % musicals.length;
+  showMusical(currentMusical);
+}
+</script>
+  
   <section id="contact">
     <div class="contact-box">
       <h2 class="section-title">Let's build something cute & useful ✨</h2>
