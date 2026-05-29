@@ -637,74 +637,8 @@
 
   </div>
 </section>
- 
-  const musicals = [
-  {
-    title: "The Phantom of the Opera",
-    image: "Phantom.jpg",
-    text: "One of my favorite musicals for its dramatic storytelling, iconic music, and gothic atmosphere."
-  },
-  {
-    title: "Notre-Dame de Paris",
-    image: "Notre-dame.jpg",
-    text: "A powerful French musical inspired by Victor Hugo's novel with emotional songs and tragic characters."
-  },
-  {
-    title: "Les Misérables",
-    image: "Lesmis.jpg",
-    text: "A legendary musical about revolution, love, sacrifice, and hope."
-  }
-  {
-    title: "Cabaret",
-    image: "Cabaret.jpg",
-    text: "A dark and unforgettable musical set in 1930s Berlin, exploring love, freedom, and political change."
-  },
-  {
-    title: "Moulin Rouge!",
-  image: "Moulinrouge.jpg",
-  text: "A dazzling musical filled with spectacular visuals, romance, and modern pop songs."
-  },
-  {
-    title: "Hadestown",
-    image: "Hadestown.jpg",
-    text: "A beautiful retelling of the myths of Orpheus and Eurydice, blending folk, jazz, and poetic storytelling."
-  }
-];
 
-let currentMusical = 0;
-
-function renderPosters() {
-  const row = document.getElementById("posterRow");
-  row.innerHTML = "";
-
-  musicals.forEach((musical, index) => {
-    const img = document.createElement("img");
-    img.src = musical.image;
-    img.alt = musical.title;
-    img.className = index === currentMusical ? "poster active" : "poster";
-    img.onclick = () => {
-      currentMusical = index;
-      renderPosters();
-    };
-    row.appendChild(img);
-  });
-
-  document.getElementById("musicalTitle").innerText = musicals[currentMusical].title;
-  document.getElementById("musicalText").innerText = musicals[currentMusical].text;
-}
-
-function nextMusical() {
-  currentMusical = (currentMusical + 1) % musicals.length;
-  renderPosters();
-}
-
-function prevMusical() {
-  currentMusical = (currentMusical - 1 + musicals.length) % musicals.length;
-  renderPosters();
-}
-
-renderPosters();
-</script>
+ </script>
   
   <section id="contact">
     <div class="contact-box">
