@@ -342,13 +342,25 @@
       line-height: 1.7;
     }
 
-   .musical-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
-}
+     .musical-grid {
+    display: flex;
+    gap: 22px;
+    overflow-x: auto;
+    padding: 10px;
+    scroll-behavior: smooth;
+    }
+
+    .musical-grid::-webkit-scrollbar {
+    height: 8px;
+    }
+
+    .musical-grid::-webkit-scrollbar-thumb {
+    background: rgba(167,139,250,0.4);
+    border-radius: 999px;
+    }
 
 .musical-item {
+  flex: 0 0 260px;
   position: relative;
   height: 420px;
   border-radius: 28px;
@@ -359,7 +371,7 @@
 }
 
 .musical-item:hover {
-  transform: scale(1.06);
+  transform: scale(1.);
   z-index: 2;
 }
 
