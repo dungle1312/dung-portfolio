@@ -342,53 +342,64 @@
       line-height: 1.7;
     }
 
-    .musical-stage {
-  text-align: center;
-  overflow: hidden;
-}
-
-.poster-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+   .musical-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 22px;
-  margin: 28px 0;
 }
 
-.poster {
-  width: 190px;
-  height: 290px;
-  object-fit: cover;
-  border-radius: 24px;
-  opacity: 0.45;
-  transform: scale(0.86);
-  transition: 0.35s ease;
-  box-shadow: 0 14px 35px rgba(167, 139, 250, 0.18);
-}
-
-.poster.active {
-  width: 260px;
-  height: 390px;
-  opacity: 1;
-  transform: scale(1);
-  box-shadow: 0 24px 70px rgba(167, 139, 250, 0.35);
-}
-
-.musical-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 22px;
-}
-
-.musical-buttons button {
-  border: none;
-  padding: 12px 18px;
-  border-radius: 999px;
-  font-weight: 700;
+.musical-item {
+  position: relative;
+  height: 420px;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
   cursor: pointer;
-  background: linear-gradient(135deg, var(--pink), var(--purple));
+  transition: 0.35s ease;
+}
+
+.musical-item:hover {
+  transform: scale(1.06);
+  z-index: 2;
+}
+
+.musical-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.musical-info {
+  position: absolute;
+  inset: 0;
+  padding: 24px;
   color: white;
+  background: linear-gradient(to top, rgba(0,0,0,0.88), rgba(0,0,0,0.05));
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  opacity: 0;
+  transition: 0.35s ease;
+}
+
+.musical-item:hover .musical-info {
+  opacity: 1;
+}
+
+.musical-info h3 {
+  font-size: 1.35rem;
+  margin-bottom: 10px;
+}
+
+.musical-info p {
+  color: rgba(255,255,255,0.9);
+  line-height: 1.5;
+}
+
+@media (max-width: 850px) {
+  .musical-grid {
+    grid-template-columns: 1fr;
+  }
 }
     footer {
       padding: 34px 0 48px;
@@ -545,42 +556,93 @@
       </div>
     </div>
   </section>
-
+ 
   <section id="musicals">
   <h2 class="section-title">Musicals I Love</h2>
 
-  <div class="card musical-stage">
-    <div class="poster-row" id="posterRow"></div>
+  <div class="musical-grid">
 
-    <h3 id="musicalTitle">The Phantom of the Opera</h3>
-
-    <p id="musicalText">
-      One of my favorite musicals for its dramatic storytelling, iconic music, and gothic atmosphere.
-    </p>
-
-    <div class="musical-buttons">
-      <button onclick="prevMusical()">Previous</button>
-      <button onclick="nextMusical()">Next</button>
+    <div class="musical-item">
+      <img src="Phantom.jpg" alt="The Phantom of the Opera">
+      <div class="musical-info">
+        <h3>The Phantom of the Opera</h3>
+        <p>A gothic romance with iconic music, mystery, and dramatic storytelling.</p>
+      </div>
     </div>
+
+    <div class="musical-item">
+      <img src="Notre-dame.jpg" alt="Notre-Dame de Paris">
+      <div class="musical-info">
+        <h3>Notre-Dame de Paris</h3>
+        <p>A powerful French musical with poetic lyrics, tragic characters, and emotional songs.</p>
+      </div>
+    </div>
+
+    <div class="musical-item">
+      <img src="Lesmis.jpg" alt="Les Misérables">
+      <div class="musical-info">
+        <h3>Les Misérables</h3>
+        <p>A legendary musical about revolution, sacrifice, justice, and hope.</p>
+      </div>
+    </div>
+
+    <div class="musical-item">
+      <img src="Cabaret.jpg" alt="Cabaret">
+      <div class="musical-info">
+        <h3>Cabaret</h3>
+        <p>A dark musical set in 1930s Berlin, exploring love, freedom, and political change.</p>
+      </div>
+    </div>
+
+    <div class="musical-item">
+      <img src="Moulinrouge.jpg" alt="Moulin Rouge">
+      <div class="musical-info">
+        <h3>Moulin Rouge!</h3>
+        <p>A dazzling musical full of romance, spectacle, and modern pop energy.</p>
+      </div>
+    </div>
+
+    <div class="musical-item">
+      <img src="Hadestown.jpg" alt="Hadestown">
+      <div class="musical-info">
+        <h3>Hadestown</h3>
+        <p>A poetic retelling of Orpheus and Eurydice with folk, jazz, and haunting storytelling.</p>
+      </div>
+    </div>
+
   </div>
 </section>
-
-<script>
-const musicals = [
+ 
+  const musicals = [
   {
     title: "The Phantom of the Opera",
-    image: "https://upload.wikimedia.org/wikipedia/en/3/3d/The_Phantom_of_the_Opera_%281986_musical%29.jpg",
+    image: "Phantom.jpg",
     text: "One of my favorite musicals for its dramatic storytelling, iconic music, and gothic atmosphere."
   },
   {
     title: "Notre-Dame de Paris",
-    image: "https://upload.wikimedia.org/wikipedia/en/6/6f/Notre-Dame_de_Paris_%28musical%29.jpg",
+    image: "Notre-dame.jpg",
     text: "A powerful French musical inspired by Victor Hugo's novel with emotional songs and tragic characters."
   },
   {
     title: "Les Misérables",
-    image: "https://upload.wikimedia.org/wikipedia/en/4/4f/Les_Miserables_2010_London_Poster.jpg",
+    image: "Lesmis.jpg",
     text: "A legendary musical about revolution, love, sacrifice, and hope."
+  }
+  {
+    title: "Cabaret",
+    image: "Cabaret.jpg",
+    text: "A dark and unforgettable musical set in 1930s Berlin, exploring love, freedom, and political change."
+  },
+  {
+    title: "Moulin Rouge!",
+  image: "Moulinrouge.jpg",
+  text: "A dazzling musical filled with spectacular visuals, romance, and modern pop songs."
+  },
+  {
+    title: "Hadestown",
+    image: "Hadestown.jpg",
+    text: "A beautiful retelling of the myths of Orpheus and Eurydice, blending folk, jazz, and poetic storytelling."
   }
 ];
 
