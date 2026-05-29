@@ -81,6 +81,20 @@
       letter-spacing: -0.04em;
     }
 
+    .logo-area {
+      display: flex;
+      flex-direction: column;
+    }
+  
+    .mini-quote {
+      margin-top: 4px;
+      font-size: 0.82rem;
+      font-style: italic;
+      color: #8a8096;
+      letter-spacing: 0.3px;
+      opacity: 0.85;
+    }
+
     .logo span {
       color: var(--pink);
     }
@@ -471,7 +485,13 @@
   <div class="blob two"></div>
 
   <nav>
+    <div class="logo-area">
     <div class="logo">Dung<span>.</span></div>
+
+    <div class="mini-quote">
+    « L'homme a voulu monter vers les étoiles. »
+    </div>
+  </div>
     <ul class="nav-links">
       <li><a href="#projects">Projects</a></li>
       <li><a href="#about">About</a></li>
@@ -482,7 +502,7 @@
 
   <main class="hero">
     <div>
-      <div class="tag">🌷 Financial Modelling · Audit · 	Sustainable Finance</div>
+      <div class="tag">🌷  · Audit · 	Sustainable Finance</div>
       <h1>Hi, I'm <span>Dung</span></h1>
       <p>
        I am passionate about finance, investment analysis, and business analytics, with an interest in turning complex information into clear and practical insights.
