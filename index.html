@@ -478,9 +478,71 @@
       flex: 0 0 220px;
     }
   }
+  
+
+    /* Cherry blossom overlay */
+    .sakura-layer {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .sakura-petal {
+      --petal-size: 13px;
+      --start-x: 50vw;
+      --drift: 8vw;
+      --rotation: 540deg;
+      --fall-duration: 10s;
+      --sway-duration: 2.4s;
+      position: absolute;
+      top: -12vh;
+      left: 0;
+      width: var(--petal-size);
+      height: var(--petal-size);
+      opacity: 0.78;
+      animation: sakura-fall var(--fall-duration) linear forwards;
+      will-change: transform;
+    }
+
+    .sakura-petal::before {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 78%;
+      border-radius: 100% 0 100% 0;
+      background: linear-gradient(135deg, #fff7fb 10%, #ffc4d9 62%, #ff8fb8 100%);
+      box-shadow: 0 2px 7px rgba(255, 105, 160, 0.22);
+      transform-origin: 50% 100%;
+      animation: sakura-sway var(--sway-duration) ease-in-out infinite alternate;
+    }
+
+    @keyframes sakura-fall {
+      from {
+        transform: translate3d(var(--start-x), -12vh, 0) rotate(0deg);
+      }
+      to {
+        transform: translate3d(calc(var(--start-x) + var(--drift)), 112vh, 0)
+          rotate(var(--rotation));
+      }
+    }
+
+    @keyframes sakura-sway {
+      from { transform: rotate(-24deg) translateX(-3px); }
+      to { transform: rotate(24deg) translateX(3px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sakura-layer {
+        display: none;
+      }
+    }
+
   </style>
 </head>
 <body>
+  <div class="sakura-layer" id="sakura-layer" aria-hidden="true"></div>
   <div class="blob one"></div>
   <div class="blob two"></div>
 
@@ -658,8 +720,6 @@
   </div>
 </section>
 
- </script>
-  
   <section id="contact">
     <div class="contact-box">
       <h2 class="section-title">Let's build something cute & useful ✨</h2>
@@ -674,5 +734,46 @@
   <footer>
     Made with care · Replace this with your LinkedIn / GitHub links
   </footer>
+
+  <script>
+    (() => {
+      const layer = document.getElementById('sakura-layer');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      if (!layer || reducedMotion.matches) return;
+
+      const petalLimit = window.innerWidth <= 850 ? 12 : 24;
+      const random = (min, max) => Math.random() * (max - min) + min;
+
+      function createPetal(delay = 0) {
+        if (reducedMotion.matches) return;
+
+        const petal = document.createElement('span');
+        petal.className = 'sakura-petal';
+        petal.setAttribute('aria-hidden', 'true');
+
+        petal.style.setProperty('--petal-size', `${random(8, 17)}px`);
+        petal.style.setProperty('--start-x', `${random(-6, 100)}vw`);
+        petal.style.setProperty('--drift', `${random(-14, 14)}vw`);
+        petal.style.setProperty('--rotation', `${random(360, 900)}deg`);
+        petal.style.setProperty('--fall-duration', `${random(7, 14)}s`);
+        petal.style.setProperty('--sway-duration', `${random(1.6, 3.4)}s`);
+        petal.style.animationDelay = `${delay}ms`;
+        petal.style.opacity = random(0.48, 0.9).toFixed(2);
+
+        layer.appendChild(petal);
+
+        petal.addEventListener('animationend', () => {
+          petal.remove();
+          window.setTimeout(() => createPetal(), random(150, 1200));
+        }, { once: true });
+      }
+
+      for (let index = 0; index < petalLimit; index += 1) {
+        createPetal(random(0, 6500));
+      }
+    })();
+  </script>
+
 </body>
 </html>
