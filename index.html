@@ -478,35 +478,45 @@
       flex: 0 0 220px;
     }
   }
-  
 
-    /* Cherry blossom overlay */
-    .sakura-layer {
+    /* Dynamic cherry blossom wind overlay */
+    .sakura-layer,
+    .sakura-ground {
       position: fixed;
       inset: 0;
-      overflow: hidden;
       pointer-events: none;
+    }
+
+    .sakura-layer {
+      overflow: hidden;
       z-index: 50;
     }
 
-    .sakura-petal {
+    .sakura-ground {
+      top: auto;
+      bottom: 0;
+      height: 56px;
+      overflow: hidden;
+      z-index: 51;
+    }
+
+    .sakura-petal,
+    .sakura-settled {
       --petal-size: 13px;
-      --start-x: 50vw;
-      --drift: 8vw;
-      --rotation: 540deg;
-      --fall-duration: 10s;
-      --sway-duration: 2.4s;
       position: absolute;
-      top: -12vh;
-      left: 0;
       width: var(--petal-size);
       height: var(--petal-size);
       opacity: 0.78;
-      animation: sakura-fall var(--fall-duration) linear forwards;
       will-change: transform;
     }
 
-    .sakura-petal::before {
+    .sakura-petal {
+      top: 0;
+      left: 0;
+    }
+
+    .sakura-petal::before,
+    .sakura-settled::before {
       content: "";
       display: block;
       width: 100%;
@@ -515,26 +525,42 @@
       background: linear-gradient(135deg, #fff7fb 10%, #ffc4d9 62%, #ff8fb8 100%);
       box-shadow: 0 2px 7px rgba(255, 105, 160, 0.22);
       transform-origin: 50% 100%;
-      animation: sakura-sway var(--sway-duration) ease-in-out infinite alternate;
     }
 
-    @keyframes sakura-fall {
-      from {
-        transform: translate3d(var(--start-x), -12vh, 0) rotate(0deg);
-      }
-      to {
-        transform: translate3d(calc(var(--start-x) + var(--drift)), 112vh, 0)
-          rotate(var(--rotation));
-      }
+    .sakura-petal::before {
+      animation: sakura-sway var(--sway-duration, 2.4s) ease-in-out infinite alternate;
+    }
+
+    .sakura-settled {
+      bottom: var(--settle-bottom, 0px);
+      animation: sakura-rest var(--rest-duration, 13s) ease-out forwards;
     }
 
     @keyframes sakura-sway {
-      from { transform: rotate(-24deg) translateX(-3px); }
-      to { transform: rotate(24deg) translateX(3px); }
+      from { transform: rotate(-28deg) translateX(-3px) scaleY(0.92); }
+      to { transform: rotate(28deg) translateX(3px) scaleY(1.05); }
+    }
+
+    @keyframes sakura-rest {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, -12px, 0) rotate(var(--settle-rotation, 0deg));
+      }
+      10%, 72% {
+        opacity: var(--settle-opacity, 0.72);
+        transform: translate3d(var(--settle-drift, 0px), 0, 0)
+          rotate(var(--settle-rotation, 0deg));
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(calc(var(--settle-drift, 0px) * 1.35), 7px, 0)
+          rotate(calc(var(--settle-rotation, 0deg) + 18deg));
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .sakura-layer {
+      .sakura-layer,
+      .sakura-ground {
         display: none;
       }
     }
@@ -543,6 +569,7 @@
 </head>
 <body>
   <div class="sakura-layer" id="sakura-layer" aria-hidden="true"></div>
+  <div class="sakura-ground" id="sakura-ground" aria-hidden="true"></div>
   <div class="blob one"></div>
   <div class="blob two"></div>
 
@@ -738,40 +765,201 @@
   <script>
     (() => {
       const layer = document.getElementById('sakura-layer');
+      const ground = document.getElementById('sakura-ground');
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-      if (!layer || reducedMotion.matches) return;
+      if (!layer || !ground || reducedMotion.matches) return;
 
-      const petalLimit = window.innerWidth <= 850 ? 12 : 24;
       const random = (min, max) => Math.random() * (max - min) + min;
+      const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+      const isMobile = window.innerWidth <= 850;
+      const limits = {
+        baseFlying: isMobile ? 11 : 20,
+        maxFlying: isMobile ? 20 : 38,
+        maxSettled: isMobile ? 14 : 30
+      };
 
-      function createPetal(delay = 0) {
-        if (reducedMotion.matches) return;
+      let viewportWidth = window.innerWidth;
+      let viewportHeight = window.innerHeight;
+      let lastFrame = performance.now();
+      let animationFrameId = 0;
+      let gustTimer = 0;
+      let gustEndTimer = 0;
+      let baseWindTimer = 0;
+      let running = true;
 
-        const petal = document.createElement('span');
-        petal.className = 'sakura-petal';
-        petal.setAttribute('aria-hidden', 'true');
+      const petals = [];
+      const wind = {
+        current: random(-18, 18),
+        target: random(-24, 24),
+        gusting: false
+      };
 
-        petal.style.setProperty('--petal-size', `${random(8, 17)}px`);
-        petal.style.setProperty('--start-x', `${random(-6, 100)}vw`);
-        petal.style.setProperty('--drift', `${random(-14, 14)}vw`);
-        petal.style.setProperty('--rotation', `${random(360, 900)}deg`);
-        petal.style.setProperty('--fall-duration', `${random(7, 14)}s`);
-        petal.style.setProperty('--sway-duration', `${random(1.6, 3.4)}s`);
-        petal.style.animationDelay = `${delay}ms`;
-        petal.style.opacity = random(0.48, 0.9).toFixed(2);
-
-        layer.appendChild(petal);
-
-        petal.addEventListener('animationend', () => {
-          petal.remove();
-          window.setTimeout(() => createPetal(), random(150, 1200));
-        }, { once: true });
+      function resetPetal(petal, initial = false, gustSpawn = false) {
+        petal.size = random(8, 17);
+        petal.x = random(-30, viewportWidth + 15);
+        petal.y = initial
+          ? random(-viewportHeight * 0.9, viewportHeight * 0.82)
+          : gustSpawn
+            ? random(-viewportHeight * 0.3, 40)
+            : random(-150, -24);
+        petal.vx = random(-12, 12);
+        petal.vy = random(gustSpawn ? 58 : 36, gustSpawn ? 102 : 76);
+        petal.personalDrift = random(-14, 14);
+        petal.rotation = random(0, 360);
+        petal.rotationSpeed = random(-150, 150);
+        petal.opacity = random(0.48, 0.9);
+        petal.element.style.setProperty('--petal-size', `${petal.size}px`);
+        petal.element.style.setProperty('--sway-duration', `${random(1.4, 3.2)}s`);
+        petal.element.style.opacity = petal.opacity.toFixed(2);
       }
 
-      for (let index = 0; index < petalLimit; index += 1) {
-        createPetal(random(0, 6500));
+      function createPetal({ temporary = false, initial = false, gustSpawn = false } = {}) {
+        if (petals.length >= limits.maxFlying || reducedMotion.matches) return;
+
+        const element = document.createElement('span');
+        element.className = 'sakura-petal';
+        element.setAttribute('aria-hidden', 'true');
+        layer.appendChild(element);
+
+        const petal = { element, temporary };
+        resetPetal(petal, initial, gustSpawn);
+        petals.push(petal);
       }
+
+      function removePetal(petal) {
+        const index = petals.indexOf(petal);
+        if (index !== -1) petals.splice(index, 1);
+        petal.element.remove();
+      }
+
+      function settlePetal(petal) {
+        while (ground.childElementCount >= limits.maxSettled && ground.firstElementChild) {
+          ground.firstElementChild.remove();
+        }
+
+        const settled = document.createElement('span');
+        settled.className = 'sakura-settled';
+        settled.setAttribute('aria-hidden', 'true');
+        settled.style.left = `${clamp(petal.x, 0, viewportWidth - petal.size)}px`;
+        settled.style.setProperty('--petal-size', `${petal.size}px`);
+        settled.style.setProperty('--settle-bottom', `${random(0, 13)}px`);
+        settled.style.setProperty('--settle-rotation', `${random(-90, 90)}deg`);
+        settled.style.setProperty('--settle-drift', `${random(-9, 9)}px`);
+        settled.style.setProperty('--settle-opacity', random(0.46, 0.8).toFixed(2));
+        settled.style.setProperty('--rest-duration', `${random(10, 18)}s`);
+        ground.appendChild(settled);
+        settled.addEventListener('animationend', () => settled.remove(), { once: true });
+      }
+
+      function recyclePetal(petal) {
+        const settleChance = wind.gusting ? 0.38 : 0.24;
+        if (Math.random() < settleChance) settlePetal(petal);
+
+        if (petal.temporary) {
+          removePetal(petal);
+        } else {
+          resetPetal(petal);
+        }
+      }
+
+      function scheduleBaseWindShift() {
+        window.clearTimeout(baseWindTimer);
+        baseWindTimer = window.setTimeout(() => {
+          if (!wind.gusting) wind.target = random(-30, 30);
+          scheduleBaseWindShift();
+        }, random(2200, 4800));
+      }
+
+      function triggerGust() {
+        if (!running || reducedMotion.matches) return;
+
+        wind.gusting = true;
+        const direction = Math.random() < 0.5 ? -1 : 1;
+        wind.target = direction * random(isMobile ? 70 : 95, isMobile ? 125 : 185);
+
+        const gustBurst = isMobile
+          ? Math.floor(random(4, 8))
+          : Math.floor(random(8, 15));
+
+        for (let index = 0; index < gustBurst; index += 1) {
+          window.setTimeout(
+            () => createPetal({ temporary: true, gustSpawn: true }),
+            index * random(35, 95)
+          );
+        }
+
+        window.clearTimeout(gustEndTimer);
+        gustEndTimer = window.setTimeout(() => {
+          wind.gusting = false;
+          wind.target = random(-26, 26);
+        }, random(1400, 2900));
+
+        scheduleNextGust();
+      }
+
+      function scheduleNextGust() {
+        window.clearTimeout(gustTimer);
+        gustTimer = window.setTimeout(triggerGust, random(4800, 9800));
+      }
+
+      function animate(now) {
+        if (!running) return;
+
+        const delta = Math.min((now - lastFrame) / 1000, 0.034);
+        lastFrame = now;
+        const windResponse = wind.gusting ? 2.8 : 0.9;
+        wind.current += (wind.target - wind.current) * Math.min(1, delta * windResponse);
+
+        for (const petal of [...petals]) {
+          const desiredHorizontalSpeed = wind.current + petal.personalDrift;
+          petal.vx += (desiredHorizontalSpeed - petal.vx) * Math.min(1, delta * 1.15);
+          petal.x += petal.vx * delta;
+          petal.y += petal.vy * delta * (wind.gusting ? 1.18 : 1);
+          petal.rotation += (petal.rotationSpeed + wind.current * 0.16) * delta;
+
+          if (petal.x > viewportWidth + 55) petal.x = -55;
+          if (petal.x < -55) petal.x = viewportWidth + 55;
+
+          if (petal.y >= viewportHeight - petal.size * 0.35) {
+            recyclePetal(petal);
+            continue;
+          }
+
+          petal.element.style.transform =
+            `translate3d(${petal.x.toFixed(1)}px, ${petal.y.toFixed(1)}px, 0) ` +
+            `rotate(${petal.rotation.toFixed(1)}deg)`;
+        }
+
+        animationFrameId = requestAnimationFrame(animate);
+      }
+
+      function stopAnimation() {
+        running = false;
+        cancelAnimationFrame(animationFrameId);
+        window.clearTimeout(gustTimer);
+        window.clearTimeout(gustEndTimer);
+        window.clearTimeout(baseWindTimer);
+        petals.splice(0).forEach((petal) => petal.element.remove());
+        ground.replaceChildren();
+      }
+
+      for (let index = 0; index < limits.baseFlying; index += 1) {
+        createPetal({ initial: true });
+      }
+
+      window.addEventListener('resize', () => {
+        viewportWidth = window.innerWidth;
+        viewportHeight = window.innerHeight;
+      });
+
+      reducedMotion.addEventListener?.('change', (event) => {
+        if (event.matches) stopAnimation();
+      });
+
+      scheduleBaseWindShift();
+      scheduleNextGust();
+      animationFrameId = requestAnimationFrame(animate);
     })();
   </script>
 
