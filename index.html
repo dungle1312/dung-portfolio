@@ -532,6 +532,7 @@
     }
 
     .sakura-settled {
+      top: auto;
       bottom: var(--settle-bottom, 0px);
       animation: sakura-rest var(--rest-duration, 13s) ease-out forwards;
     }
@@ -543,10 +544,16 @@
 
     @keyframes sakura-rest {
       0% {
-        opacity: 0;
-        transform: translate3d(0, -12px, 0) rotate(var(--settle-rotation, 0deg));
+        opacity: var(--settle-opacity, 0.72);
+        transform: translate3d(0, -1px, 0)
+          rotate(var(--settle-rotation, 0deg));
       }
-      10%, 72% {
+      8% {
+        opacity: var(--settle-opacity, 0.72);
+        transform: translate3d(calc(var(--settle-drift, 0px) * 0.25), 1px, 0)
+          rotate(calc(var(--settle-rotation, 0deg) + 3deg));
+      }
+      18%, 74% {
         opacity: var(--settle-opacity, 0.72);
         transform: translate3d(var(--settle-drift, 0px), 0, 0)
           rotate(var(--settle-rotation, 0deg));
@@ -797,25 +804,39 @@
 
       function resetPetal(petal, initial = false, gustSpawn = false) {
         petal.size = random(8, 17);
-        petal.x = random(-30, viewportWidth + 15);
-        petal.y = initial
-          ? random(-viewportHeight * 0.9, viewportHeight * 0.82)
-          : gustSpawn
-            ? random(-viewportHeight * 0.3, 40)
+
+        if (gustSpawn) {
+          petal.x = random(viewportWidth * 0.6, viewportWidth + 35);
+          petal.y = random(-viewportHeight * 0.3, 40);
+        } else {
+          petal.x = random(-30, viewportWidth + 15);
+          petal.y = initial
+            ? random(-viewportHeight * 0.9, viewportHeight * 0.82)
             : random(-150, -24);
-        petal.vx = random(-12, 12);
+        }
+
+        petal.vx = random(-18, -5);
         petal.vy = random(gustSpawn ? 58 : 36, gustSpawn ? 102 : 76);
-        petal.personalDrift = random(-14, 14);
+        petal.personalDrift = random(-12, 0);
         petal.rotation = random(0, 360);
         petal.rotationSpeed = random(-150, 150);
         petal.opacity = random(0.48, 0.9);
+
+        petal.element.className = 'sakura-petal';
+        petal.element.style.left = '0';
+        petal.element.style.bottom = 'auto';
+        petal.element.style.transform = '';
         petal.element.style.setProperty('--petal-size', `${petal.size}px`);
         petal.element.style.setProperty('--sway-duration', `${random(1.4, 3.2)}s`);
         petal.element.style.opacity = petal.opacity.toFixed(2);
+
+        if (petal.element.parentElement !== layer) {
+          layer.appendChild(petal.element);
+        }
       }
 
       function createPetal({ temporary = false, initial = false, gustSpawn = false } = {}) {
-        if (petals.length >= limits.maxFlying || reducedMotion.matches) return;
+        if (!running || petals.length >= limits.maxFlying || reducedMotion.matches) return;
 
         const element = document.createElement('span');
         element.className = 'sakura-petal';
@@ -827,9 +848,13 @@
         petals.push(petal);
       }
 
-      function removePetal(petal) {
+      function detachFlyingPetal(petal) {
         const index = petals.indexOf(petal);
         if (index !== -1) petals.splice(index, 1);
+      }
+
+      function removePetal(petal) {
+        detachFlyingPetal(petal);
         petal.element.remove();
       }
 
@@ -838,23 +863,44 @@
           ground.firstElementChild.remove();
         }
 
-        const settled = document.createElement('span');
-        settled.className = 'sakura-settled';
-        settled.setAttribute('aria-hidden', 'true');
-        settled.style.left = `${clamp(petal.x, 0, viewportWidth - petal.size)}px`;
-        settled.style.setProperty('--petal-size', `${petal.size}px`);
-        settled.style.setProperty('--settle-bottom', `${random(0, 13)}px`);
-        settled.style.setProperty('--settle-rotation', `${random(-90, 90)}deg`);
-        settled.style.setProperty('--settle-drift', `${random(-9, 9)}px`);
-        settled.style.setProperty('--settle-opacity', random(0.46, 0.8).toFixed(2));
-        settled.style.setProperty('--rest-duration', `${random(10, 18)}s`);
-        ground.appendChild(settled);
-        settled.addEventListener('animationend', () => settled.remove(), { once: true });
+        const element = petal.element;
+        const landingX = clamp(petal.x, 0, viewportWidth - petal.size);
+        const landingRotation = petal.rotation;
+        const landingDrift = clamp(petal.vx * 0.18, -7, 0);
+        const landingOpacity = petal.opacity;
+        const shouldReplace = !petal.temporary;
+
+        detachFlyingPetal(petal);
+
+        /* Reuse the exact falling petal instead of creating a new one. */
+        element.className = 'sakura-settled';
+        element.style.left = `${landingX}px`;
+        element.style.top = 'auto';
+        element.style.bottom = `${random(0, 11)}px`;
+        element.style.transform = 'none';
+        element.style.opacity = '';
+        element.style.setProperty('--petal-size', `${petal.size}px`);
+        element.style.setProperty('--settle-bottom', `${random(0, 11)}px`);
+        element.style.setProperty('--settle-rotation', `${landingRotation}deg`);
+        element.style.setProperty('--settle-drift', `${landingDrift}px`);
+        element.style.setProperty('--settle-opacity', landingOpacity.toFixed(2));
+        element.style.setProperty('--rest-duration', `${random(10, 18)}s`);
+        ground.appendChild(element);
+
+        element.addEventListener('animationend', () => element.remove(), { once: true });
+
+        if (shouldReplace) {
+          window.setTimeout(() => createPetal(), random(90, 420));
+        }
       }
 
       function recyclePetal(petal) {
         const settleChance = wind.gusting ? 0.38 : 0.24;
-        if (Math.random() < settleChance) settlePetal(petal);
+
+        if (Math.random() < settleChance) {
+          settlePetal(petal);
+          return;
+        }
 
         if (petal.temporary) {
           removePetal(petal);
@@ -875,8 +921,7 @@
         if (!running || reducedMotion.matches) return;
 
         wind.gusting = true;
-          const direction = -1;
-        wind.target = direction * random(isMobile ? 70 : 95, isMobile ? 125 : 185);
+        wind.target = -random(isMobile ? 70 : 95, isMobile ? 125 : 185);
 
         const gustBurst = isMobile
           ? Math.floor(random(4, 8))
@@ -918,8 +963,8 @@
           petal.y += petal.vy * delta * (wind.gusting ? 1.18 : 1);
           petal.rotation += (petal.rotationSpeed + wind.current * 0.16) * delta;
 
-          if (petal.x > viewportWidth + 55) petal.x = -55;
           if (petal.x < -55) petal.x = viewportWidth + 55;
+          if (petal.x > viewportWidth + 55) petal.x = viewportWidth + 55;
 
           if (petal.y >= viewportHeight - petal.size * 0.35) {
             recyclePetal(petal);
