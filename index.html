@@ -866,7 +866,7 @@
       function scheduleBaseWindShift() {
         window.clearTimeout(baseWindTimer);
         baseWindTimer = window.setTimeout(() => {
-          if (!wind.gusting) wind.target = random(-30, -);
+          if (!wind.gusting) wind.target = random(-30, -10);
           scheduleBaseWindShift();
         }, random(2200, 4800));
       }
@@ -892,7 +892,7 @@
         window.clearTimeout(gustEndTimer);
         gustEndTimer = window.setTimeout(() => {
           wind.gusting = false;
-          wind.target = random(-26, -);
+          wind.target = random(-26, -10);
         }, random(1400, 2900));
 
         scheduleNextGust();
