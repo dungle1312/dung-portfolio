@@ -790,8 +790,8 @@
 
       const petals = [];
       const wind = {
-        current: random(-18, 18),
-        target: random(-24, 24),
+        current: random(-22, -10),
+        target: random(-28, -12),
         gusting: false
       };
 
@@ -866,7 +866,7 @@
       function scheduleBaseWindShift() {
         window.clearTimeout(baseWindTimer);
         baseWindTimer = window.setTimeout(() => {
-          if (!wind.gusting) wind.target = random(-30, 30);
+          if (!wind.gusting) wind.target = random(-30, -);
           scheduleBaseWindShift();
         }, random(2200, 4800));
       }
@@ -875,7 +875,7 @@
         if (!running || reducedMotion.matches) return;
 
         wind.gusting = true;
-        const direction = Math.random() < 0.5 ? -1 : 1;
+          const direction = -1;
         wind.target = direction * random(isMobile ? 70 : 95, isMobile ? 125 : 185);
 
         const gustBurst = isMobile
@@ -892,7 +892,7 @@
         window.clearTimeout(gustEndTimer);
         gustEndTimer = window.setTimeout(() => {
           wind.gusting = false;
-          wind.target = random(-26, 26);
+          wind.target = random(-26, -);
         }, random(1400, 2900));
 
         scheduleNextGust();
